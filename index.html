@@ -18,8 +18,8 @@
     canvas {
       border: 3px solid black;
       background: #cce7ff;
-      width: 95vw;   /* Make canvas fill most of the phone width */
-      height: 60vh;  /* Adjust height for phones */
+      width: 95vw;
+      height: 60vh;
     }
     .btn {
       margin-top: 15px;
@@ -55,25 +55,28 @@
   <button id="jumpBtn" class="btn">JUMP</button>
   <button id="restartBtn" class="btn">RESTART</button>
 
+  <!-- Only Game Over Music -->
+  <audio id="gameOverMusic" src="gameover.mp3" loop></audio>
+
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const jumpBtn = document.getElementById("jumpBtn");
     const restartBtn = document.getElementById("restartBtn");
     const starBtn = document.getElementById("starBtn");
+    const gameOverMusic = document.getElementById("gameOverMusic");
 
-    // Resize canvas dynamically for phone
     canvas.width = window.innerWidth * 0.95;
     canvas.height = window.innerHeight * 0.6;
 
     let player, obstacles, frame, score, gameOver, gameStarted = false;
+    let musicPlayed = false;
 
-    // Load image for Dinesh Bot
     const dineshImg = new Image();
-    dineshImg.src = "dinshe.jpg"; // Place this image in the SAME folder as HTML
+    dineshImg.src = "dinshe.jpg"; 
 
     function initGame() {
-      const scale = canvas.width / 600; // Scale based on phone size
+      const scale = canvas.width / 600;
       player = {
         x: 50 * scale,
         y: canvas.height - 100 * scale,
@@ -89,9 +92,15 @@
       score = 0;
       gameOver = false;
       gameStarted = true;
+      musicPlayed = false;
       restartBtn.style.display = "none";
       starBtn.style.display = "none";
       jumpBtn.style.display = "inline-block";
+
+      // Stop Game Over music if it was playing
+      gameOverMusic.pause();
+      gameOverMusic.currentTime = 0;
+
       gameLoop();
     }
 
@@ -124,7 +133,7 @@
           height: 80 * scale 
         });
       }
-      obstacles.forEach(ob => ob.x -= 6 * scale);
+      obstacles.forEach(ob => ob.x -= 3 * scale); 
       obstacles = obstacles.filter(ob => ob.x + ob.width > 0);
     }
 
@@ -170,7 +179,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "black";
         ctx.font = `${28 * (canvas.width / 600)}px Arial`;
-        ctx.fillText("         msyuresh start kar ⭐ !", canvas.width/6, canvas.height/2);
+        ctx.fillText("⭐ Tap START to play, Mayuresh!", canvas.width/8, canvas.height/2);
         return;
       }
 
@@ -178,14 +187,22 @@
         ctx.fillStyle = "black";
         ctx.font = `${32 * (canvas.width / 600)}px Arial`;
         ctx.fillText("Game Over!", canvas.width/2.8, canvas.height/2);
+
         restartBtn.style.display = "inline-block";
         jumpBtn.style.display = "none";
+
+        // Play Game Over music once
+        if (!musicPlayed) {
+          musicPlayed = true;
+          gameOverMusic.currentTime = 0;
+          gameOverMusic.play();
+        }
+
         return;
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw ground
       ctx.fillStyle = "#654321";
       ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
 
@@ -202,22 +219,18 @@
       requestAnimationFrame(gameLoop);
     }
 
-    // Controls for PC
     document.addEventListener("keydown", e => {
       if (e.code === "Space" && gameStarted) jump();
     });
 
-    // Buttons
     jumpBtn.addEventListener("click", jump);
     restartBtn.addEventListener("click", initGame);
     starBtn.addEventListener("click", initGame);
 
-    // Mobile touch support
     canvas.addEventListener("touchstart", () => {
       if (gameStarted) jump();
     });
 
-    // Show start screen
     gameLoop();
   </script>
 </body>
